@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congress by Sortition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #d4d4d8;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #e4e4e7;
+            border: 2px solid #71717a;
+            padding: 30px;
+            border-radius: 4px;
+        }
+        
+        header {
+            text-align: center;
+            border-bottom: 2px solid #52525b;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        
+        h1 {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #18181b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #fafafa;
+            border: 1px solid #a1a1aa;
+            border-radius: 4px;
+        }
+        
+        button {
+            background: #fafafa;
+            border: 2px solid #71717a;
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 0 5px;
+            font-family: 'Courier New', Courier, monospace;
+            text-transform: uppercase;
+            color: #18181b;
+            transition: all 0.2s;
+            border-radius: 3px;
+        }
+        
+        button:hover {
+            background: #e4e4e7;
+            border-color: #52525b;
+        }
+        
+        button.active {
+            background: #18181b;
+            color: #fafafa;
+            border-color: #18181b;
+        }
+        
+        .generate-btn {
+            background: #18181b;
+            color: #fafafa;
+            font-size: 1.1em;
+            padding: 12px 35px;
+            margin-left: 15px;
+            border: 2px solid #18181b;
+        }
+        
+        .generate-btn:hover {
+            background: #27272a;
+            border-color: #27272a;
+        }
+        
+        .chart-panel {
+            background: #fafafa;
+            border: 2px solid #71717a;
+            padding: 0;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .chart-title {
+            text-align: center;
+            background: #27272a;
+            color: #fafafa;
+            font-size: 1.3em;
+            font-weight: 700;
+            padding: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #27272a;
+            color: #fafafa;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.95em;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        th.sortition-col {
+            background: #1e40af;
+            color: #fafafa;
+        }
+        
+        th.current-col {
+            background: #991b1b;
+            color: #fafafa;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #d4d4d8;
+            font-size: 0.95em;
+            color: #18181b;
+            font-weight: 600;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:nth-child(even) {
+            background: #f4f4f5;
+        }
+        
+        .group-name {
+            font-weight: 700;
+            color: #18181b;
+        }
+        
+        .sortition-value {
+            color: #1e40af;
+            font-weight: 700;
+            background: #dbeafe;
+        }
+        
+        .current-value {
+            color: #991b1b;
+            font-weight: 700;
+            background: #fee2e2;
+        }
+        
+        .zero-value {
+            color: #71717a;
+            font-style: italic;
+        }
+        
+        .section-header {
+            background: #71717a !important;
+            color: #fafafa;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+        
+        .section-header td {
+            padding: 8px 12px;
+            border-top: 1px solid #52525b;
+            border-bottom: 1px solid #52525b;
+        }
+        
+        .unrepresented-section {
+            background: #fef2f2 !important;
+        }
+        
+        .unrepresented-section .group-name {
+            color: #991b1b;
+            font-weight: 700;
+        }
+        
+        .explanation {
+            background: #fafafa;
+            border: 2px solid #71717a;
+            padding: 20px;
+            text-align: left;
+            color: #27272a;
+            font-size: 0.9em;
+            line-height: 1.6;
+            font-weight: 600;
+            border-radius: 4px;
+        }
+        
+        .explanation strong {
+            text-transform: uppercase;
+            color: #18181b;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.6em;
+            }
+            
+            .generate-btn {
+                margin-left: 0;
+                margin-top: 10px;
+                display: block;
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Congress by Sortition</h1>
+        </header>
+        
+        <div class="controls">
+            <button id="houseBtn" class="active" onclick="setChamber('house')">House (435)</button>
+            <button id="senateBtn" onclick="setChamber('senate')">Senate (100)</button>
+            <button class="generate-btn" onclick="generate()">Generate New Sample</button>
+        </div>
+        
+        <div class="chart-panel">
+            <div class="chart-title">Demographic Comparison Table</div>
+            <table id="comparisonTable"></table>
+        </div>
+        
+        <div class="explanation">
+            <strong>Definition:</strong> Sortition is the selection of political representatives by random lottery from all eligible citizens.
+            <br><br>
+            <strong>Methodology:</strong> This analysis compares the demographic composition of a randomly selected Congress (sortition) against the current elected Congress. Data reflects actual U.S. Census demographics and current Congressional composition.
+            <br><br>
+            <strong>Note:</strong> Rows with pink background indicate demographic groups with zero representation in the current Congress.
+        </div>
+    </div>
+
+    <script>
+        // US Demographics (Census data)
+        const demographics = {
+            age: {'18-29': 0.21, '30-39': 0.18, '40-49': 0.16, '50-64': 0.25, '65+': 0.20},
+            gender: {'Female': 0.51, 'Male': 0.49},
+            race: {'White': 0.61, 'Hispanic': 0.18, 'Black': 0.12, 'Asian': 0.06, 'Other': 0.03},
+            income: {'Under $25k': 0.19, '$25k-50k': 0.22, '$50k-75k': 0.17, '$75k-100k': 0.14, 'Over $100k': 0.28},
+            education: {'HS or Less': 0.39, 'Some College': 0.28, 'Bachelor\'s': 0.21, 'Graduate': 0.12},
+            employment: {'Full-time': 0.49, 'Part-time': 0.13, 'Unemployed': 0.04, 'Student': 0.08, 'Retired': 0.18, 'Disabled': 0.05, 'Other': 0.03}
+        };
+        
+        // Current Congress (actual data)
+        const currentHouse = {
+            age: {'18-29': 0, '30-39': 0.04, '40-49': 0.15, '50-64': 0.48, '65+': 0.33},
+            gender: {'Female': 0.29, 'Male': 0.71},
+            race: {'White': 0.73, 'Hispanic': 0.10, 'Black': 0.12, 'Asian': 0.04, 'Other': 0.01},
+            income: {'Under $25k': 0, '$25k-50k': 0, '$50k-75k': 0, '$75k-100k': 0, 'Over $100k': 1.00},
+            education: {'HS or Less': 0, 'Some College': 0, 'Bachelor\'s': 0.40, 'Graduate': 0.60},
+            employment: {'Full-time': 1.00, 'Part-time': 0, 'Unemployed': 0, 'Student': 0, 'Retired': 0, 'Disabled': 0, 'Other': 0}
+        };
+        
+        const currentSenate = {
+            age: {'18-29': 0, '30-39': 0.01, '40-49': 0.10, '50-64': 0.44, '65+': 0.45},
+            gender: {'Female': 0.25, 'Male': 0.75},
+            race: {'White': 0.91, 'Hispanic': 0.06, 'Black': 0.03, 'Asian': 0, 'Other': 0},
+            income: {'Under $25k': 0, '$25k-50k': 0, '$50k-75k': 0, '$75k-100k': 0, 'Over $100k': 1.00},
+            education: {'HS or Less': 0, 'Some College': 0, 'Bachelor\'s': 0.35, 'Graduate': 0.65},
+            employment: {'Full-time': 1.00, 'Part-time': 0, 'Unemployed': 0, 'Student': 0, 'Retired': 0, 'Disabled': 0, 'Other': 0}
+        };
+        
+        let chamber = 'house';
+        let sortitionData = {};
+        
+        function setChamber(c) {
+            chamber = c;
+            document.getElementById('houseBtn').classList.toggle('active', c === 'house');
+            document.getElementById('senateBtn').classList.toggle('active', c === 'senate');
+            generate();
+        }
+        
+        function randomSample(size) {
+            const result = {};
+            
+            for (let category in demographics) {
+                result[category] = {};
+                const options = demographics[category];
+                const counts = {};
+                
+                for (let option in options) {
+                    counts[option] = 0;
+                }
+                
+                for (let i = 0; i < size; i++) {
+                    const rand = Math.random();
+                    let cumulative = 0;
+                    
+                    for (let option in options) {
+                        cumulative += options[option];
+                        if (rand <= cumulative) {
+                            counts[option]++;
+                            break;
+                        }
+                    }
+                }
+                
+                for (let option in counts) {
+                    result[category][option] = counts[option] / size;
+                }
+            }
+            
+            return result;
+        }
+        
+        function generate() {
+            const size = chamber === 'house' ? 435 : 100;
+            sortitionData = randomSample(size);
+            const current = chamber === 'house' ? currentHouse : currentSenate;
+            
+            // Represented groups
+            const represented = [
+                {group: 'Women', sort: Math.round(sortitionData.gender['Female'] * 100), curr: Math.round(current.gender['Female'] * 100)},
+                {group: 'Men', sort: Math.round(sortitionData.gender['Male'] * 100), curr: Math.round(current.gender['Male'] * 100)},
+                {group: 'White', sort: Math.round(sortitionData.race['White'] * 100), curr: Math.round(current.race['White'] * 100)},
+                {group: 'Hispanic/Latino', sort: Math.round(sortitionData.race['Hispanic'] * 100), curr: Math.round(current.race['Hispanic'] * 100)},
+                {group: 'Black/African American', sort: Math.round(sortitionData.race['Black'] * 100), curr: Math.round(current.race['Black'] * 100)},
+                {group: 'Asian American', sort: Math.round(sortitionData.race['Asian'] * 100), curr: Math.round(current.race['Asian'] * 100)},
+                {group: 'Age 18-29', sort: Math.round(sortitionData.age['18-29'] * 100), curr: Math.round(current.age['18-29'] * 100)},
+                {group: 'Age 30-39', sort: Math.round(sortitionData.age['30-39'] * 100), curr: Math.round(current.age['30-39'] * 100)},
+                {group: 'Age 40-49', sort: Math.round(sortitionData.age['40-49'] * 100), curr: Math.round(current.age['40-49'] * 100)},
+                {group: 'Age 50-64', sort: Math.round(sortitionData.age['50-64'] * 100), curr: Math.round(current.age['50-64'] * 100)},
+                {group: 'Age 65+', sort: Math.round(sortitionData.age['65+'] * 100), curr: Math.round(current.age['65+'] * 100)},
+                {group: 'Income Over $100k', sort: Math.round(sortitionData.income['Over $100k'] * 100), curr: Math.round(current.income['Over $100k'] * 100)},
+                {group: 'Bachelor\'s Degree', sort: Math.round(sortitionData.education['Bachelor\'s'] * 100), curr: Math.round(current.education['Bachelor\'s'] * 100)},
+                {group: 'Graduate Degree', sort: Math.round(sortitionData.education['Graduate'] * 100), curr: Math.round(current.education['Graduate'] * 100)},
+                {group: 'Employed Full-Time', sort: Math.round(sortitionData.employment['Full-time'] * 100), curr: Math.round(current.employment['Full-time'] * 100)},
+                {group: 'Retired', sort: Math.round(sortitionData.employment['Retired'] * 100), curr: Math.round(current.employment['Retired'] * 100)}
+            ];
+            
+            // Unrepresented groups
+            const unrepresented = [
+                {group: 'Income Under $25k', sort: Math.round(sortitionData.income['Under $25k'] * 100), curr: 0},
+                {group: 'Income $25k-$50k', sort: Math.round(sortitionData.income['$25k-50k'] * 100), curr: 0},
+                {group: 'Income $50k-$75k', sort: Math.round(sortitionData.income['$50k-75k'] * 100), curr: 0},
+                {group: 'Income $75k-$100k', sort: Math.round(sortitionData.income['$75k-100k'] * 100), curr: 0},
+                {group: 'High School or Less', sort: Math.round(sortitionData.education['HS or Less'] * 100), curr: 0},
+                {group: 'Some College', sort: Math.round(sortitionData.education['Some College'] * 100), curr: 0},
+                {group: 'Employed Part-Time', sort: Math.round(sortitionData.employment['Part-time'] * 100), curr: 0},
+                {group: 'Unemployed', sort: Math.round(sortitionData.employment['Unemployed'] * 100), curr: 0},
+                {group: 'Students', sort: Math.round(sortitionData.employment['Student'] * 100), curr: 0},
+                {group: 'Disabled/Unable to Work', sort: Math.round(sortitionData.employment['Disabled'] * 100), curr: 0}
+            ];
+            
+            let html = `
+                <thead>
+                    <tr>
+                        <th>Demographic Group</th>
+                        <th class="sortition-col">Sortition (%)</th>
+                        <th class="current-col">Current (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="section-header">
+                        <td colspan="3">REPRESENTED GROUPS</td>
+                    </tr>
+            `;
+            
+            represented.forEach(row => {
+                html += `
+                    <tr>
+                        <td class="group-name">${row.group}</td>
+                        <td class="sortition-value">${row.sort}%</td>
+                        <td class="current-value">${row.curr}%</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    <tr class="section-header">
+                        <td colspan="3">UNREPRESENTED GROUPS (0% IN CURRENT CONGRESS)</td>
+                    </tr>
+            `;
+            
+            unrepresented.forEach(row => {
+                html += `
+                    <tr class="unrepresented-section">
+                        <td class="group-name">${row.group}</td>
+                        <td class="sortition-value">${row.sort}%</td>
+                        <td class="current-value zero-value">0%</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody>';
+            
+            document.getElementById('comparisonTable').innerHTML = html;
+        }
+        
+        // Generate on load
+        generate();
+    </script>
+</body>
+</html>
